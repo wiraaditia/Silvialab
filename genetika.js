@@ -310,11 +310,15 @@ function simStart(){
 }
 $('sRun').onclick=()=>{simStart()};
 $('sRec').onclick=()=>{
-  if(!window.MediaRecorder){$('sStat').textContent='Browser ini tidak mendukung perekaman.';return}
+  if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream){$('sStat').textContent='Browser ini belum mendukung perekaman video. Coba Chrome/Edge, atau gunakan rekam layar bawaan HP.';return}
   const cv=$('gCell');simStart();recChunks=[];
-  try{const stream=cv.captureStream(30);rec=new MediaRecorder(stream,{mimeType:MediaRecorder.isTypeSupported('video/webm;codecs=vp9')?'video/webm;codecs=vp9':'video/webm'});
+  try{const stream=cv.captureStream(30);
+    const types=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm','video/mp4;codecs=avc1','video/mp4'];
+    const mt=types.find(t=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(t))||'';
+    const ext=mt.indexOf('mp4')>=0?'mp4':'webm';
+    rec=mt?new MediaRecorder(stream,{mimeType:mt}):new MediaRecorder(stream);
     rec.ondataavailable=e=>{if(e.data.size)recChunks.push(e.data)};
-    rec.onstop=()=>{const url=URL.createObjectURL(new Blob(recChunks,{type:'video/webm'}));const a=$('sDl');a.href=url;a.style.display='';$('sStat').textContent='Video siap diunduh.'};
+    rec.onstop=()=>{const url=URL.createObjectURL(new Blob(recChunks,{type:ext==='mp4'?'video/mp4':'video/webm'}));const a=$('sDl');a.href=url;a.download='simulasi-silvialab.'+ext;a.style.display='';$('sStat').textContent='Video siap diunduh.'};
     rec.start();$('sStat').textContent='Merekam…';$('sDl').style.display='none'}catch(e){$('sStat').textContent='Gagal merekam: '+e.message}
 };
 function cellFrame(t,idle){
