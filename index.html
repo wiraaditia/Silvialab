@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Silvialab</title>
+<script>try{var t=localStorage.getItem('kl-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<style>
+:root{
+  --bg:#f2f3f5;--surface:#ffffff;--surface2:#f7f8fa;--line:#d8dce3;--line2:#e7e9ee;
+  --text:#161a22;--muted:#5d6676;--accent:#1d4fd7;--accent-soft:#e8eefc;--accent-ink:#fff;
+  --bond:#7f8a9d;--canvas:#f6f7f9;--danger:#b42318;--ok:#177245;--warn:#9a5b00;
+  --font:"Inter","Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+[data-theme=dark]{
+  --bg:#0c1016;--surface:#141a22;--surface2:#19202a;--line:#2a323e;--line2:#212935;
+  --text:#e6e9ef;--muted:#8b95a7;--accent:#6e9bff;--accent-soft:#1a2740;--accent-ink:#0a1020;
+  --bond:#9aa6bb;--canvas:#0f141b;--danger:#ff8a7a;--ok:#5fd394;--warn:#f0b35a;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 var(--font);-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+a{color:var(--accent)}
+sub,sup{line-height:0}
+/* top bar */
+.top{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:stretch;gap:28px;padding:0 24px;height:52px}
+.brand{display:flex;align-items:center;font-weight:650;font-size:15px;letter-spacing:.01em;white-space:nowrap}
+.brand small{font-weight:400;color:var(--muted);margin-left:10px;font-size:12.5px}
+.tabs{display:flex;gap:2px;flex:1}
+.tab{background:none;border:0;border-bottom:2px solid transparent;padding:0 14px;cursor:pointer;color:var(--muted);font-weight:500;font-size:14px}
+.tab:hover{color:var(--text)}
+.tab.on{color:var(--text);border-bottom-color:var(--accent)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;align-self:center}
+.seg button{background:var(--surface);border:0;padding:5px 12px;cursor:pointer;font-size:12.5px;color:var(--muted)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+/* layout */
+.view{display:none;padding:18px 24px 40px;max-width:1560px;margin:0 auto}
+.view.on{display:block}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) 470px;gap:16px;align-items:start}
+.grid-j{display:grid;grid-template-columns:360px minmax(0,1fr);gap:16px;align-items:start}
+.grid-e{display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:16px;align-items:start}
+@media(max-width:1180px){.grid2,.grid-j,.grid-e{grid-template-columns:1fr}.sticky{position:static!important;max-height:none!important}}
+.sticky{position:sticky;top:68px;max-height:calc(100vh - 84px);overflow:auto}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px}
+.card+.card{margin-top:14px}
+.card h2{margin:0 0 12px;font-size:13px;font-weight:650;color:var(--text)}
+.card h2 span{font-weight:400;color:var(--muted);margin-left:6px}
+.stack{display:flex;flex-direction:column;gap:14px}.stack>.card+.card{margin-top:0}
+.muted{color:var(--muted)}.small{font-size:12.5px}
+/* controls */
+.btn{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:5px 11px;cursor:pointer;font-size:13px;white-space:nowrap}
+.btn:hover{background:var(--surface2);border-color:var(--bond)}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.5;cursor:default}
+input[type=text],input[type=search],select{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:8px 10px;outline:none}
+input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row.nowrap{flex-wrap:nowrap}
+.mt{margin-top:10px}.mt2{margin-top:16px}
+.err{color:var(--danger);font-size:12.5px;min-height:18px;margin-top:4px}
+label.chk{display:inline-flex;gap:6px;align-items:center;font-size:13px;cursor:pointer}
+/* periodic table */
+.ptwrap{overflow-x:auto;container-type:inline-size}
+.pt{display:grid;grid-template-columns:repeat(18,minmax(38px,1fr));gap:3px;min-width:720px}
+.el{position:relative;aspect-ratio:1/1.1;border-radius:4px;cursor:pointer;user-select:none;padding:3px 4px;display:flex;flex-direction:column;justify-content:space-between;
+  background:color-mix(in srgb,var(--c) 17%,var(--surface));border:1px solid color-mix(in srgb,var(--c) 38%,var(--line))}
+.el:hover{outline:2px solid var(--text);outline-offset:-1px;z-index:2}
+.el .n{font-size:9px;color:var(--muted);line-height:1}
+.el .s{font-size:clamp(12px,1.45vw,17px);font-weight:650;text-align:center;line-height:1}
+.el .m{font-size:7px;color:var(--muted);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1}
+@container (max-width:900px){.el .m{display:none}}
+.el.on{outline:2px solid var(--accent);outline-offset:-1px;background:color-mix(in srgb,var(--c) 34%,var(--surface))}
+.el .cnt{position:absolute;top:-7px;right:-6px;min-width:18px;height:18px;border-radius:9px;background:var(--accent);color:var(--accent-ink);font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.lab{grid-column:1/3;font-size:10.5px;color:var(--muted);align-self:center;text-align:right;padding-right:6px}
+.gap{grid-column:1/-1;height:6px}
+.elinfo{margin-top:12px;min-height:22px;font-size:13px;color:var(--muted)}
+.elinfo b{color:var(--text)}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:10px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px;background:color-mix(in srgb,var(--c) 45%,var(--surface));border:1px solid color-mix(in srgb,var(--c) 70%,var(--line))}
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:6px;background:var(--surface2);padding:1px 2px 1px 9px;font-weight:650}
+.chip sub{font-size:11px;margin-right:4px}
+.chip button{background:none;border:0;color:var(--muted);cursor:pointer;padding:2px 6px;font-size:14px;line-height:1}
+.chip button:hover{color:var(--accent)}
+/* result */
+.rhead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.bigf{font-size:28px;font-weight:650;letter-spacing:.01em}
+.bigf sub{font-size:.55em}
+.rname{font-size:16px;font-weight:600}
+.rname small{display:block;font-size:12.5px;color:var(--muted);font-weight:400}
+.tag{font-size:12px;border:1px solid var(--line);border-radius:4px;padding:1px 8px;color:var(--muted);background:var(--surface2)}
+.tabsub{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.viewer{position:relative;margin-top:12px;border:1px solid var(--line);border-radius:6px;background:var(--canvas);overflow:hidden}
+canvas.v3{display:block;width:100%;height:320px;cursor:grab;touch-action:none}
+canvas.v3:active{cursor:grabbing}
+.vtools{position:absolute;left:8px;bottom:8px;display:flex;gap:4px;flex-wrap:wrap}
+.vtools .btn{padding:3px 8px;font-size:12px;background:var(--surface)}
+.vtools .btn.on{background:var(--accent-soft)}
+.vnote{position:absolute;right:10px;top:8px;font-size:11.5px;color:var(--muted)}
+dl.facts{display:grid;grid-template-columns:128px 1fr;gap:8px 12px;margin:14px 0 0}
+dl.facts dt{color:var(--muted);font-size:12.5px}
+dl.facts dd{margin:0;word-break:break-word}
+.bar{display:flex;height:8px;border-radius:2px;overflow:hidden;margin-top:6px;border:1px solid var(--line)}
+.eq{margin-top:14px;padding:10px 12px;background:var(--surface2);border:1px solid var(--line);border-radius:6px}
+.eq small{display:block;color:var(--muted);font-size:12px;margin-bottom:2px}
+.sec{margin-top:16px}
+.sec h3{margin:0 0 8px;font-size:12.5px;color:var(--muted);font-weight:600}
+.empty{color:var(--muted);padding:26px 6px;text-align:center}
+.note{font-size:12.5px;color:var(--muted);border-left:3px solid var(--line);padding:2px 0 2px 10px;margin-top:10px}
+.warn{color:var(--warn)}
+/* list results */
+.rlist{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.ritem{display:block;width:100%;text-align:left;background:var(--surface);border:0;border-bottom:1px solid var(--line2);padding:9px 12px;cursor:pointer}
+.ritem:last-child{border-bottom:0}
+.ritem:hover{background:var(--surface2)}
+.ritem.on{background:var(--accent-soft)}
+.ritem b{display:block;font-weight:600}
+.ritem span{color:var(--muted);font-size:12.5px}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp .8s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes sp{to{transform:rotate(360deg)}}
+table.t{width:100%;border-collapse:collapse;font-size:13px}
+table.t td,table.t th{padding:6px 8px;border-bottom:1px solid var(--line2);text-align:left;vertical-align:top}
+table.t th{font-weight:600;color:var(--muted);font-size:12px}
+/* bio */
+.bio-main{display:grid;grid-template-columns:330px minmax(0,1fr);gap:16px;align-items:start}
+@media(max-width:1100px){.bio-main{grid-template-columns:1fr}}
+.cat h3{margin:14px 0 6px;font-size:12px;font-weight:650;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.cat h3:first-child{margin-top:0}
+.cat button{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line2);padding:7px 4px;cursor:pointer}
+.cat button:hover{background:var(--surface2)}
+.cat button.on{background:var(--accent-soft)}
+.cat button b{font-weight:600}.cat button code{color:var(--muted);font-size:11.5px;margin-left:6px}
+.cat button span{display:block;color:var(--muted);font-size:12.5px}
+#b3d{position:relative;width:100%;height:520px;border:1px solid var(--line);border-radius:6px;background:var(--canvas);overflow:hidden}
+.anat{display:grid;grid-template-columns:minmax(0,340px) minmax(0,320px);gap:28px;align-items:center;justify-content:start}
+.anat svg{width:100%;height:auto;max-height:300px}
+.anat .part{cursor:pointer}
+.anat .part:hover *,.anat .part.on *{stroke:var(--accent)!important}
+.anat .part:hover,.anat .part.on{filter:none}
+.plist button{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line2);padding:6px 2px;cursor:pointer;font-size:13px}
+.plist button:hover,.plist button.on{color:var(--accent)}
+/* editor */
+.etool{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+#esvg{width:100%;height:440px;background:var(--canvas);border:1px solid var(--line);border-radius:6px;touch-action:none;user-select:none;display:block}
+.pal{display:flex;gap:4px;flex-wrap:wrap}
+.pal .btn{min-width:34px;padding:4px 6px;font-weight:600}
+.sm{width:auto!important}
+
+/* ===== mobile bar ===== */
+.mbar{display:none}
+/* ===== responsif ===== */
+html{-webkit-text-size-adjust:100%}
+@media(max-width:760px){
+  body{font-size:14px}
+  .top{flex-wrap:wrap;height:auto;gap:0 10px;padding:8px 12px 0}
+  .brand{order:1;height:36px}.brand small{display:none}
+  .seg[aria-label=Tema]{order:2;margin-left:auto;height:30px}
+  .tabs{order:3;width:100%;flex:none;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -12px;padding:0 6px}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{padding:10px 12px;white-space:nowrap;flex:none}
+  .view{padding:12px 10px 90px}
+  .card{padding:12px;border-radius:8px}
+  .card h2 span{display:block;margin:2px 0 0}
+  .pt{min-width:600px;grid-template-columns:repeat(18,minmax(30px,1fr))}
+  .el .s{font-size:13px}.el .n{font-size:8px}
+  .ptwrap{margin:0 -4px;padding:0 4px 4px}
+  .ptwrap::after{content:"geser ke samping untuk melihat seluruh tabel";display:block;font-size:11.5px;color:var(--muted);margin-top:6px;position:sticky;left:0}
+  .elinfo{font-size:12.5px}
+  dl.facts{grid-template-columns:1fr;gap:2px}
+  dl.facts dt{margin-top:8px}
+  .sl{grid-template-columns:112px 1fr 52px;font-size:12.5px}
+  .bigf{font-size:24px}
+  canvas.v3{height:280px}
+  #cv2{height:300px!important}#cv3{height:250px!important}
+  #gHelix{height:230px!important}#gCr{height:280px!important}#gCell{height:300px!important}
+  #b3d{height:380px}
+  .anat{grid-template-columns:1fr;gap:8px}
+  .anat svg{max-height:250px;margin:0 auto;display:block}
+  .bio-main,.grid-e,.grid-j,.grid2{gap:12px}
+  #eimp{width:100%!important;flex:1}
+  #esvg{height:380px}
+  .etool{gap:6px}
+  .vtools .btn{padding:4px 9px}
+  .btn{padding:7px 12px}
+  .chip button{padding:4px 9px}
+  input[type=text],input[type=search],select,textarea.seq{font-size:16px}
+  .row.nowrap{flex-wrap:wrap}
+  #jform.row.nowrap,#bform.row.nowrap{flex-wrap:nowrap}
+  .steps{flex-wrap:wrap}.steps div{flex:1 1 30%;margin-top:-1px}
+  .rlist .ritem{padding:11px 12px}
+  .cat button{padding:10px 4px}
+  .mbar{display:flex;position:fixed;left:10px;right:10px;bottom:10px;z-index:30;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 12px;align-items:center;gap:10px;box-shadow:0 4px 18px rgba(0,0,0,.18)}
+  .mbar.hide{display:none}
+  .mbar b{font-size:16px}.mbar span{color:var(--muted);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  footer{padding:0 12px 80px}
+}
+@media(max-width:420px){.pt{min-width:560px}}
+footer{padding:0 24px 28px;color:var(--muted);font-size:12px;max-width:1560px;margin:0 auto}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">Silvialab<small>tabel periodik · molekul · biomolekul</small></div>
+  <nav class="tabs" id="tabs">
+    <button class="tab on" data-tab="perakit">Perakit</button>
+    <button class="tab" data-tab="jelajah">Jelajah senyawa</button>
+    <button class="tab" data-tab="bio">Biomolekul &amp; virus</button>
+    <button class="tab" data-tab="editor">Editor molekul</button>
+  </nav>
+  <div class="seg" role="group" aria-label="Tema">
+    <button data-theme-btn="light">Terang</button>
+    <button data-theme-btn="dark">Gelap</button>
+  </div>
+</header>
+
+<!-- ============ PERAKIT ============ -->
+<main class="view on" id="v-perakit">
+  <div class="grid2">
+    <section class="card">
+      <h2>Tabel periodik<span>klik untuk menambah atom, Shift+klik atau klik kanan untuk mengurangi</span></h2>
+      <div class="ptwrap"><div id="pt" class="pt"></div></div>
+      <div class="elinfo" id="elinfo">Arahkan kursor ke sebuah unsur untuk melihat detailnya.</div>
+      <div class="legend" id="legend"></div>
+    </section>
+    <aside class="stack sticky">
+      <div class="card">
+        <h2>Wadah reaksi</h2>
+        <input type="text" id="formula" placeholder="Ketik rumus: H2 + O,  Na + Cl,  Ca(OH)2,  C2H5OH" autocomplete="off" spellcheck="false">
+        <div class="err" id="err"></div>
+        <div class="chips" id="chips"></div>
+        <div class="row mt">
+          <button class="btn" id="clear">Kosongkan</button>
+          <span class="muted small">Contoh</span>
+          <span id="examples" class="row" style="gap:6px"></span>
+        </div>
+        <div class="mt"><input type="search" id="search" list="cmpds" placeholder="Cari senyawa dalam database lokal (mis. aspirin, garam dapur)"><datalist id="cmpds"></datalist></div>
+      </div>
+      <div class="card" id="result">
+        <div id="empty" class="empty">Wadah masih kosong. Pilih unsur dari tabel, misalnya H dua kali lalu O satu kali.</div>
+        <div id="resbody" style="display:none">
+          <div class="rhead" id="rhead"></div>
+          <div class="tabsub" id="rtabs"></div>
+          <div class="viewer">
+            <canvas class="v3" id="cv1"></canvas>
+            <div class="vnote" id="vnote"></div>
+            <div class="vtools" data-for="1"><button class="btn on" data-v="spin">Putar</button><button class="btn on" data-v="label">Label</button><button class="btn" data-v="style">Bola-tongkat</button><button class="btn" data-v="lp">PEB</button></div>
+          </div>
+          <dl class="facts" id="facts"></dl>
+          <div class="eq" id="eq" style="display:none"></div>
+          <div class="sec" id="sugg"></div>
+          <div class="sec" id="pcform"></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<!-- ============ JELAJAH ============ -->
+<main class="view" id="v-jelajah">
+  <div class="grid-j">
+    <aside class="stack">
+      <div class="card">
+        <h2>Cari senyawa<span>PubChem · puluhan juta senyawa</span></h2>
+        <form id="jform" class="row nowrap"><input type="search" id="jq" placeholder="Nama, rumus, SMILES, atau CID" autocomplete="off"><button class="btn primary" type="submit">Cari</button></form>
+        <div class="muted small mt">Contoh: <span id="jex" class="row" style="display:inline-flex;gap:5px"></span></div>
+        <div class="note">Nama bahasa Indonesia untuk senyawa umum (air, garam dapur, asam sulfat) dikenali. Untuk senyawa lain gunakan nama Inggris/IUPAC, rumus, atau SMILES.</div>
+      </div>
+      <div class="card" id="jresCard" style="display:none"><h2 id="jresTitle">Hasil</h2><div class="rlist" id="jlist"></div></div>
+    </aside>
+    <section>
+      <div class="card" id="jdetail"><div class="empty">Cari sebuah senyawa untuk melihat struktur 3D dan sifat-sifatnya.<br>Data diambil langsung dari PubChem sehingga butuh koneksi internet.</div></div>
+    </section>
+  </div>
+</main>
+
+<!-- ============ BIOMOLEKUL ============ -->
+<main class="view" id="v-bio">
+  <div class="card" style="margin-bottom:14px">
+    <h2>Anatomi virus<span>ilustrasi skematis, bukan skala. Klik komponen untuk memuat struktur aslinya dari Protein Data Bank</span></h2>
+    <div class="row" style="margin-bottom:8px"><div class="seg"><button class="on" data-virus="hiv">HIV-1</button><button data-virus="cov">SARS-CoV-2</button></div></div>
+    <div class="anat"><div id="anatSvg"></div><div class="plist" id="anatList"></div></div>
+  </div>
+  <div class="bio-main">
+    <aside class="stack">
+      <div class="card">
+        <h2>Cari di Protein Data Bank</h2>
+        <form id="bform" class="row nowrap"><input type="search" id="bq" placeholder="mis. snake venom, hemoglobin, 1HVR"><button class="btn primary" type="submit">Cari</button></form>
+        <div class="small muted mt" id="bstatus"></div>
+        <div class="rlist mt" id="bres" style="display:none"></div>
+      </div>
+      <div class="card cat" id="bcat" style="max-height:560px;overflow:auto"></div>
+    </aside>
+    <section>
+      <div class="card">
+        <div class="rhead" style="margin-bottom:10px"><div class="rname" id="btitle">Belum ada struktur dimuat<small id="bsub">Pilih dari anatomi virus, katalog, atau pencarian</small></div></div>
+        <div class="row" style="margin-bottom:10px">
+          <select id="bstyle" class="sm"><option value="cartoon">Pita (cartoon)</option><option value="stick">Batang</option><option value="sphere">Bola</option><option value="surface">Permukaan</option><option value="line">Garis</option></select>
+          <select id="bcolor" class="sm"><option value="spectrum">Warna spektrum</option><option value="chain">Per rantai</option><option value="ssPyMOL">Struktur sekunder</option><option value="amino">Jenis asam amino</option></select>
+          <label class="chk"><input type="checkbox" id="bspin"> Putar</label>
+          <label class="chk" title="Memuat seluruh unit biologis; bisa sangat berat untuk kapsid virus"><input type="checkbox" id="basm"> Unit biologis lengkap</label>
+        </div>
+        <div id="b3d"></div>
+        <div class="small muted mt" id="bhelp">Seret untuk memutar, scroll untuk zoom, klik kanan + seret untuk menggeser.</div>
+        <dl class="facts" id="binfo"></dl>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- ============ EDITOR ============ -->
+<main class="view" id="v-editor">
+  <div class="grid-e">
+    <section class="card">
+      <h2>Kanvas<span>seret dari atom ke ruang kosong untuk menambah ikatan, seret ke atom lain untuk menghubungkan, klik ikatan untuk mengubah orde</span></h2>
+      <div class="etool">
+        <div class="seg" id="etools"><button class="on" data-tool="draw">Gambar</button><button data-tool="move">Pindah</button><button data-tool="charge">Muatan</button><button data-tool="erase">Hapus</button></div>
+        <button class="btn" id="eundo">Urungkan</button><button class="btn" id="eclear">Bersihkan</button>
+      </div>
+      <div class="etool"><span class="muted small">Unsur</span><div class="pal" id="epal"></div><input type="text" id="eother" class="sm" style="width:64px!important" placeholder="Lain" maxlength="2"></div>
+      <svg id="esvg" viewBox="0 0 640 440"></svg>
+      <div class="etool mt"><span class="muted small">Cetakan</span>
+        <button class="btn" data-tpl="benzene">Benzena</button><button class="btn" data-tpl="cyclohexane">Sikloheksana</button><button class="btn" data-tpl="chain">Rantai 4C</button>
+        <span class="muted small" style="margin-left:12px">Impor dari PubChem</span>
+        <input type="text" id="eimp" class="sm" style="width:190px" placeholder="mis. aspirin"><button class="btn" id="eimpgo">Impor</button>
+      </div>
+      <div class="err" id="eerr"></div>
+    </section>
+    <aside class="stack">
+      <div class="card" id="eanal"></div>
+      <div class="card">
+        <h2>Struktur 3D<span>perkiraan VSEPR</span></h2>
+        <div class="viewer" style="margin-top:0"><canvas class="v3" id="cv3" style="height:280px"></canvas>
+          <div class="vtools" data-for="3"><button class="btn on" data-v="spin">Putar</button><button class="btn on" data-v="label">Label</button><button class="btn" data-v="style">Bola-tongkat</button></div></div>
+      </div>
+      <div class="card" id="epc"></div>
+    </aside>
+  </div>
+</main>
+
+<footer>Struktur 3D pada tab Perakit dan Editor adalah perkiraan berdasarkan teori VSEPR, bukan hasil perhitungan kuantum. Data senyawa dari PubChem (NCBI), struktur biomolekul dari RCSB Protein Data Bank; tab Jelajah dan Biomolekul membutuhkan internet. Penampil biomolekul: 3Dmol.js.</footer>
+
+<div class="mbar hide" id="mbar"><b id="mbF"></b><span id="mbN"></span><button class="btn primary" id="mbGo">Lihat hasil</button></div>
+<script src="lib/3Dmol-min.js"></script>
+<script src="chem-core.js"></script>
+<script src="app.js"></script>
+<script src="genetika.js"></script>
+</body>
+</html>
